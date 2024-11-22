@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertBatch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        async function saveDomains() {
+            const domains = document.getElementById('domainInput').value;
+            try {
+                const response = await fetch('http://localhost:3000/save-domains', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ domains })
+                });
+
+                const data = await response.json();
+                alert(data.success ? 'Domains saved successfully.' : 'Failed to save domains.');
+            } catch (error) {
+                console.error('Error saving domains:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function applyCert() {
+            try {
+                const response = await fetch('http://localhost:3000/apply-cert', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    const orderIds = data.orders.map(order => order.orderId).filter(id => id !== null).join(', ');
+                    console.table(data.orders);
+                    alert(`Certificate application successful. Order IDs: ${orderIds}`);
+                } else {
+                    alert('Failed to apply certificates.');
+                }
+            } catch (error) {
+                console.error('Error applying certificate:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function checkCertStatus() {
+            try {
+                const response = await fetch('http://localhost:3000/check-cert-status', { method: 'POST' });
+                const data = await response.json();
+                if (data.success && data.details) {
+                    data.details.forEach(detail => {
+                        alert(`Domain: ${detail.domain}\nOrder ID: ${detail.orderId}\nOrder Status: ${detail.orderStatusCN}`);
+                    });
+                } else {
+                    alert('Failed to check certificate status.');
+                }
+            } catch (error) {
+                console.error('Error checking certificate status:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function deleteApplyCert() {
+            try {
+                const response = await fetch('http://localhost:3000/delete-cert-order', { method: 'POST' });
+                const data = await response.json();
+                if (data.success && data.results) {
+                    data.results.forEach(result => {
+                        alert(`Order ID: ${result.orderId}\nDomain: ${result.domain || 'N/A'}\nCancellation ${result.code === '成功' ? 'Succeeded' : 'Failed'}`);
+                    });
+                } else {
+                    alert('Failed to delete certificate order.');
+                }
+            } catch (error) {
+                console.error('Error deleting certificate order:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>CertBatch 管理</h1>
+
+<h2>输入域名</h2>
+<textarea id="domainInput" placeholder="每行输入一个域名"></textarea>
+<button onclick="saveDomains()">保存域名到文件</button>
+
+<h2>操作</h2>
+<button onclick="applyCert()">为输入的域名申请证书</button>
+<button onclick="checkCertStatus()">查询证书申请状态</button>
+<button onclick="deleteApplyCert()">取消证书申请</button>
+</body>
+</html>

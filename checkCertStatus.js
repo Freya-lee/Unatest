@@ -144,7 +144,6 @@ async function createExcelFile(domains) {
     console.log('Excel file has been created successfully.');
 }
 
-// checkCertStatus 函数
 async function checkCertStatus() {
     const certificates = readCertificatesList('CertificatesList.json');
     if (certificates.length === 0) {
@@ -154,6 +153,5 @@ async function checkCertStatus() {
     await createExcelFile(certificates);
 }
 
-// 导出 checkCertStatus 函数
-module.exports = { checkCertStatus };
-
+// 导出 readCertificatesList 和 checkCertStatus 函数
+module.exports = { readCertificatesList, checkCertStatus };

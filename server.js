@@ -44,13 +44,8 @@ app.post('/apply-cert', async (req, res) => {
 
 app.post('/check-cert-status', async (req, res) => {
     try {
-        const certificates = readCertificatesList('CertificatesList.json');
-        if (certificates.length === 0) {
-            return res.status(404).json({ success: false, message: 'No certificates found.' });
-        }
-
-        const details = await Promise.all(certificates.map(cert => fetchOrderDetails(cert.orderId)));
-        res.json({ success: true, details });
+        await checkCertStatus();
+        res.json({ success: true, message: 'Certificate status checked and file created.' });
     } catch (error) {
         console.error('Error checking certificate status:', error);
         res.status(500).json({ success: false, message: 'Failed to check certificate status.', error: error.message });
